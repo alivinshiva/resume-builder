@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { PlusCircle, Trash2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 
 type Education = {
   school: string
@@ -119,11 +121,19 @@ export default function ResumeBuilder() {
     setEducation(newEducation)
   }
 
-  const handleExperienceChange = (index: number, field: keyof Experience, value: string) => {
+  const handleExperienceChange = (index: number, field: keyof Experience, value: string | string[]) => {
     const newExperience = [...experience]
-    newExperience[index][field] = value
+
+    // Check if the field being updated is 'responsibilities', which is a string array
+    if (field === 'responsibilities') {
+      newExperience[index][field] = value as string[] // Ensure value is an array when updating responsibilities
+    } else {
+      newExperience[index][field] = value as string // Other fields expect a string
+    }
+
     setExperience(newExperience)
   }
+
 
   const handleResponsibilityChange = (expIndex: number, respIndex: number, value: string) => {
     const newExperience = [...experience]
@@ -133,6 +143,7 @@ export default function ResumeBuilder() {
 
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
     const newProjects = [...projects]
+    // @ts-ignore - Ignoring type check for this line
     newProjects[index][field] = value
     setProjects(newProjects)
   }
@@ -191,11 +202,37 @@ export default function ResumeBuilder() {
     setProjects(newProjects)
   }
 
+  const resumeRef = useRef(null)
+
+  const downloadPDF = async () => {
+    if (resumeRef.current) {
+      const canvas = await html2canvas(resumeRef.current, {
+        scale: 2
+      });
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: 'a4'
+      })
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      // const imgX = (pdfWidth - imgWidth * ratio) / 2
+      const imgX = 1
+      const imgY = 1
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
+      pdf.save(`${personalInfo.name.replace(' ', '_')}_resume.pdf`)
+    }
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
       <div className="w-full md:w-1/2 p-4 overflow-y-auto">
         <h2 className="text-2xl font-bold mb-4">Edit Resume</h2>
-        
+
         <section className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Personal Information</h3>
           {Object.entries(personalInfo).map(([key, value]) => (
@@ -266,7 +303,7 @@ export default function ResumeBuilder() {
                   ) : (
                     <>
                       <Label>Responsibilities</Label>
-                      {value.map((resp: string, respIndex: number) => (
+                      {Array.isArray(value) && value.map((resp: string, respIndex: number) => (
                         <div key={respIndex} className="flex items-center mb-2">
                           <Input
                             value={resp}
@@ -312,7 +349,7 @@ export default function ResumeBuilder() {
                   ) : (
                     <>
                       <Label>Details</Label>
-                      {value.map((detail: string, detailIndex: number) => (
+                      {Array.isArray(value) && value.map((detail: string, detailIndex: number) => (
                         <div key={detailIndex} className="flex items-center mb-2">
                           <Input
                             value={detail}
@@ -327,6 +364,7 @@ export default function ResumeBuilder() {
                           </Button>
                         </div>
                       ))}
+
                       <Button onClick={() => addProjectDetail(index)}><PlusCircle className="mr-2 h-4 w-4" />Add Detail</Button>
                     </>
                   )}
@@ -341,80 +379,96 @@ export default function ResumeBuilder() {
         </section>
       </div>
 
-      <div className="w-full md:w-1/2 p-4 overflow-y-auto bg-gray-100">
-        <h2 className="text-2xl font-bold mb-4">Resume Preview</h2>
-        <div className="bg-white p-8 shadow-lg">
-          <header className="text-center mb-8">
-            <h1 className="text-3xl font-bol mb-2">{personalInfo.name}</h1>
-            <p className="text-sm">
-              {personalInfo.phone} | {personalInfo.email} | {personalInfo.linkedin} | {personalInfo.github}
-            </p>
-          </header>
+      <div className="w-full md:w-1/2 p-4 overflow-y-auto bg-gray-100 dark:bg-gray-900">
+        <div className="flex justify-between items-center mb-4 mt-3">
+          <h2 className="text-2xl font-bold dark:text-white">Resume Preview</h2>
+          <Button onClick={downloadPDF} className="">
+            Download as PDF
+          </Button>
+        </div>
+        <div className="bg-white dark:bg-gray-800 shadow-lg dark:shadow-none">
+          <div ref={resumeRef} className="bg-white dark:bg-gray-800 p-8">
+            <header className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2 dark:text-white">{personalInfo.name}</h1>
+              <p className="text-sm dark:text-gray-400">
+                {personalInfo.phone} | {personalInfo.email} | {personalInfo.linkedin} | {personalInfo.github}
+              </p>
+            </header>
 
-          <section className="mb-6">
-            <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300">EDUCATION</h2>
-            {education.map((edu, index) => (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between">
-                  <strong>{edu.school}</strong>
-                  <span>{edu.location}</span>
+            <section className="mb-6">
+              <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300 dark:border-gray-700 dark:text-white">
+                EDUCATION
+              </h2>
+              {education.map((edu, index) => (
+                <div key={index} className="mb-2">
+                  <div className="flex justify-between dark:text-white">
+                    <strong>{edu.school}</strong>
+                    <span>{edu.location}</span>
+                  </div>
+                  <div className="flex justify-between text-sm dark:text-gray-400">
+                    <em>{edu.degree}</em>
+                    <span>{edu.date}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <em>{edu.degree}</em>
-                  <span>{edu.date}</span>
-                </div>
-              </div>
-            ))}
-          </section>
+              ))}
+            </section>
 
-          <section className="mb-6">
-            <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300">TECHNICAL SKILLS</h2>
-            <p><strong>Languages:</strong> {technicalSkills.languages}</p>
-            <p><strong>Frameworks:</strong> {technicalSkills.frameworks}</p>
-            <p><strong>Developer Tools:</strong> {technicalSkills.developerTools}</p>
-            <p><strong>Libraries:</strong> {technicalSkills.libraries}</p>
-          </section>
+            <section className="mb-6">
+              <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300 dark:border-gray-700 dark:text-white">
+                TECHNICAL SKILLS
+              </h2>
+              <p className="dark:text-gray-400"><strong>Languages:</strong> {technicalSkills.languages}</p>
+              <p className="dark:text-gray-400"><strong>Frameworks:</strong> {technicalSkills.frameworks}</p>
+              <p className="dark:text-gray-400"><strong>Developer Tools:</strong> {technicalSkills.developerTools}</p>
+              <p className="dark:text-gray-400"><strong>Libraries:</strong> {technicalSkills.libraries}</p>
+            </section>
 
-          <section className="mb-6">
-            <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300">EXPERIENCE</h2>
-            {experience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex justify-between">
-                  <strong>{exp.title}</strong>
-                  <span>{exp.date}</span>
+            <section className="mb-6">
+              <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300 dark:border-gray-700 dark:text-white">
+                EXPERIENCE
+              </h2>
+              {experience.map((exp, index) => (
+                <div key={index} className="mb-4">
+                  <div className="flex justify-between dark:text-white">
+                    <strong>{exp.title}</strong>
+                    <span>{exp.date}</span>
+                  </div>
+                  <div className="flex justify-between text-sm dark:text-gray-400">
+                    <em>{exp.company}</em>
+                    <span>{exp.location}</span>
+                  </div>
+                  <ul className="list-disc list-inside dark:text-gray-400">
+                    {exp.responsibilities.map((resp, respIndex) => (
+                      <li key={respIndex} className="text-sm">{resp}</li>
+                    ))}
+                  </ul>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <em>{exp.company}</em>
-                  <span>{exp.location}</span>
-                </div>
-                <ul className="list-disc list-inside">
-                  {exp.responsibilities.map((resp, respIndex) => (
-                    <li key={respIndex} className="text-sm">{resp}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
+              ))}
+            </section>
 
-          <section>
-            <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300">PROJECTS</h2>
-            {projects.map((project, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex justify-between">
-                  <strong>{project.name}</strong>
-                  <span>{project.date}</span>
+            <section>
+              <h2 className="text-xl font-bold mb-2 border-b-2 border-gray-300 dark:border-gray-700 dark:text-white">
+                PROJECTS
+              </h2>
+              {projects.map((project, index) => (
+                <div key={index} className="mb-4">
+                  <div className="flex justify-between dark:text-white">
+                    <strong>{project.name}</strong>
+                    <span>{project.date}</span>
+                  </div>
+                  <p className="text-sm italic dark:text-gray-400">{project.technologies}</p>
+                  <ul className="list-disc list-inside dark:text-gray-400">
+                    {project.details.map((detail, detailIndex) => (
+                      <li key={detailIndex} className="text-sm">{detail}</li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-sm italic">{project.technologies}</p>
-                <ul className="list-disc list-inside">
-                  {project.details.map((detail, detailIndex) => (
-                    <li key={detailIndex} className="text-sm">{detail}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
+              ))}
+            </section>
+          </div>
         </div>
       </div>
+
     </div>
   )
 }
