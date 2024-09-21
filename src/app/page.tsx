@@ -157,7 +157,7 @@ export default function ResumeBuilder() {
 
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
     const newProjects = [...projects]
-    // @ts-ignore - Ignoring type check for this line
+    //@ts-ignore
     newProjects[index][field] = value
     setProjects(newProjects)
   }
