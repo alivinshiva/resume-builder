@@ -252,8 +252,9 @@ export default function ResumeBuilder() {
           </div>
           <div className="mt-4">
             All the best for your job search!
-
           </div>
+
+            Site only compatible on desktop, aviod mobile access.
         </div>
       </header>
       <div className="w-full md:w-1/2 p-4 overflow-y-auto">
