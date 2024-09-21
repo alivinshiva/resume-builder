@@ -157,7 +157,7 @@ export default function ResumeBuilder() {
 
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
     const newProjects = [...projects]
-    //@ts-expect-error
+    // @ts-expect-error: This is a known issue with TypeScript typing for this function
     newProjects[index][field] = value
     setProjects(newProjects)
   }
