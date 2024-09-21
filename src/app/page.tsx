@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react'
 import { Input } from "@/components/ui/input"
-// import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { PlusCircle, Trash2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
@@ -92,7 +91,22 @@ export default function ResumeBuilder() {
       name: 'Gitlytics',
       technologies: 'Python, Flask, React, PostgreSQL, Docker',
       date: 'June 2020 - Present',
-      details: ["lorem ipsum", "lorem ipsum", "lorem ipsum   "]
+      details: [
+        'Developed a Minecraft server plugin to entertain kids during free time for a previous job',
+        'Published plugin to websites gaining 2K+ downloads and an average 4.5/5-star review',
+        'Implemented continuous delivery using TravisCI to build the plugin upon new a release',
+        'Collaborated with Minecraft server administrators to suggest features and get feedback about the plugin']
+    },
+    {
+      name: 'Simple Paintball',
+      technologies: 'Spigot API, Java, Maven, TravisCI, Git',
+      date: 'May 2018 - May 2020',
+      details: [
+        'Developed a Minecraft server plugin to entertain kids during free time for a previous job',
+        'Published plugin to websites gaining 2K+ downloads and an average 4.5/5-star review',
+        'Implemented continuous delivery using TravisCI to build the plugin upon new a release',
+        'Collaborated with Minecraft server administrators to suggest features and get feedback about the plugin'
+      ]
     },
     {
       name: 'Simple Paintball',
@@ -227,13 +241,7 @@ export default function ResumeBuilder() {
       pdf.save(`${personalInfo.name.replace(' ', '_')}_resume.pdf`)
     }
   }
-  const handleDonateClick = () => {
-    const paymentButton = document.querySelector("script[data-payment_button_id]");
-    if (paymentButton) {
-      paymentButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    }
-  }
-  <form><script src="https://checkout.razorpay.com/v1/payment-button.js" data-payment_button_id="pl_OzpiyhYJwqNlWe" async> </script> </form>
+
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
@@ -242,21 +250,9 @@ export default function ResumeBuilder() {
           <div className="mb-auto">
             <h1 className="text-2xl font-bold md:text-3xl">Resume Builder</h1>
           </div>
-          <div className="mt-auto">
-            <form>
-              <script
-                src="https://checkout.razorpay.com/v1/payment-button.js"
-                data-payment_button_id="pl_OzpiyhYJwqNlWe"
-                async
-              ></script>
-              {/* <button
-                type="button" // Set to button to prevent form submission
-                className="bg-secondary text-white font-semibold py-2 px-4 rounded-md"
-                onClick={handleDonateClick} // Trigger the payment button
-              >
-                Donate
-              </button> */}
-            </form>
+          <div className="mt-4">
+            All the best for your job search!
+
           </div>
         </div>
       </header>
