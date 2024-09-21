@@ -227,9 +227,39 @@ export default function ResumeBuilder() {
       pdf.save(`${personalInfo.name.replace(' ', '_')}_resume.pdf`)
     }
   }
+  const handleDonateClick = () => {
+    const paymentButton = document.querySelector("script[data-payment_button_id]");
+    if (paymentButton) {
+      paymentButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
+  }
+  <form><script src="https://checkout.razorpay.com/v1/payment-button.js" data-payment_button_id="pl_OzpiyhYJwqNlWe" async> </script> </form>
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      <header className="bg-primary text-primary-foreground shadow-md">
+        <div className="container mx-auto px-4 py-4 flex flex-col justify-between items-center md:items-start">
+          <div className="mb-auto">
+            <h1 className="text-2xl font-bold md:text-3xl">Resume Builder</h1>
+          </div>
+          <div className="mt-auto">
+            <form>
+              <script
+                src="https://checkout.razorpay.com/v1/payment-button.js"
+                data-payment_button_id="pl_OzpiyhYJwqNlWe"
+                async
+              ></script>
+              {/* <button
+                type="button" // Set to button to prevent form submission
+                className="bg-secondary text-white font-semibold py-2 px-4 rounded-md"
+                onClick={handleDonateClick} // Trigger the payment button
+              >
+                Donate
+              </button> */}
+            </form>
+          </div>
+        </div>
+      </header>
       <div className="w-full md:w-1/2 p-4 overflow-y-auto">
         <h2 className="text-2xl font-bold mb-4">Edit Resume</h2>
 
