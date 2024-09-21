@@ -157,7 +157,7 @@ export default function ResumeBuilder() {
 
   const handleProjectChange = (index: number, field: keyof Project, value: string) => {
     const newProjects = [...projects]
-    //@ts-ignore
+    //@ts-expect-error
     newProjects[index][field] = value
     setProjects(newProjects)
   }
